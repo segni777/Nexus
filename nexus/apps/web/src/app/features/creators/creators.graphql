@@ -1,0 +1,49 @@
+query CreatorRoster(
+  $page: PaginationInput
+  $filter: CreatorFilter
+) {
+  creators(page: $page, filter: $filter) {
+    items {
+      id
+      handle
+      displayName
+      primaryPlatform
+      followerCount
+      engagementRate
+      ratePerPost
+      status
+      createdAt
+    }
+    pageInfo {
+      offset
+      limit
+      totalCount
+      hasNextPage
+    }
+  }
+}
+
+query CreatorDetail($id: ID!) {
+  creator(id: $id) {
+    id
+    handle
+    displayName
+    primaryPlatform
+    followerCount
+    engagementRate
+    ratePerPost
+    status
+    createdAt
+    campaigns(page: { limit: 10 }) {
+      items {
+        id
+        name
+        status
+        budgetCents
+      }
+      pageInfo {
+        totalCount
+      }
+    }
+  }
+}

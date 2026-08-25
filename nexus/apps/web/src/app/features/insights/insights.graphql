@@ -1,0 +1,24 @@
+query InsightsPanel(
+  $page: PaginationInput
+  $scope: InsightScope
+  $scopeId: ID
+) {
+  insights(
+    page: $page
+    scope: $scope
+    scopeId: $scopeId
+  ) {
+    items {
+      id
+      scope
+      scopeId
+      generatedAt
+      model
+      summaryText
+      payloadJson
+    }
+    pageInfo {
+      totalCount
+    }
+  }
+}

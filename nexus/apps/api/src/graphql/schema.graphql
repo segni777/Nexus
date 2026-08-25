@@ -1,0 +1,212 @@
+scalar DateTime
+scalar JSON
+
+enum Platform { TIKTOK INSTAGRAM YOUTUBE }
+enum CreatorStatus { PROSPECT ACTIVE PAUSED CHURNED }
+enum CampaignStatus { DRAFT ACTIVE COMPLETED CANCELLED }
+enum CampaignRole { PRIMARY SUPPORTING AFFILIATE }
+enum DeliverableType { VIDEO POST STORY LIVESTREAM }
+enum DeliverableStatus { ASSIGNED IN_REVIEW APPROVED POSTED OVERDUE }
+enum InsightScope { CREATOR CAMPAIGN }
+
+input PaginationInput {
+  offset: Int! = 0
+  limit: Int! = 20
+}
+
+type PageInfo {
+  offset: Int!
+  limit: Int!
+  totalCount: Int!
+  hasNextPage: Boolean!
+}
+
+input CreatorFilter {
+  status: CreatorStatus
+  platform: Platform
+}
+
+input CampaignFilter {
+  status: CampaignStatus
+  brandId: ID
+  creatorId: ID
+}
+
+input DeliverableFilter {
+  status: DeliverableStatus
+  campaignId: ID
+  creatorId: ID
+}
+
+type Brand {
+  id: ID!
+  name: String!
+  industry: String!
+  contactEmail: String!
+  campaigns(page: PaginationInput): CampaignConnection!
+}
+
+type BrandConnection {
+  items: [Brand!]!
+  pageInfo: PageInfo!
+}
+
+type Creator {
+  id: ID!
+  handle: String!
+  displayName: String!
+  primaryPlatform: Platform!
+  followerCount: Int!
+  engagementRate: Float!
+  ratePerPost: Int!
+  status: CreatorStatus!
+  createdAt: DateTime!
+  campaigns(page: PaginationInput): CampaignConnection!
+  deliverables(page: PaginationInput): DeliverableConnection!
+}
+
+type CreatorConnection {
+  items: [Creator!]!
+  pageInfo: PageInfo!
+}
+
+type Campaign {
+  id: ID!
+  brandId: ID!
+  brand: Brand!
+  name: String!
+  spentCents: Int!
+  budgetCents: Int!
+  startDate: DateTime!
+  endDate: DateTime!
+  status: CampaignStatus!
+  creators(page: PaginationInput): CampaignCreatorConnection!
+  deliverables(page: PaginationInput): DeliverableConnection!
+}
+
+type CampaignConnection {
+  items: [Campaign!]!
+  pageInfo: PageInfo!
+}
+
+type CampaignCreator {
+  campaignId: ID!
+  creatorId: ID!
+  creator: Creator!
+  agreedRateCents: Int!
+  role: CampaignRole!
+}
+
+type CampaignCreatorConnection {
+  items: [CampaignCreator!]!
+  pageInfo: PageInfo!
+}
+
+type Deliverable {
+  id: ID!
+  campaignId: ID!
+  creatorId: ID!
+  campaign: Campaign!
+  creator: Creator!
+  type: DeliverableType!
+  dueDate: DateTime!
+  postedUrl: String
+  status: DeliverableStatus!
+  metrics(page: PaginationInput): MetricsSnapshotConnection!
+}
+
+type DeliverableConnection {
+  items: [Deliverable!]!
+  pageInfo: PageInfo!
+}
+
+type MetricsSnapshot {
+  id: ID!
+  deliverableId: ID!
+  capturedAt: DateTime!
+  views: Int!
+  likes: Int!
+  comments: Int!
+  shares: Int!
+  watchTimeSeconds: Int!
+}
+
+type MetricsSnapshotConnection {
+  items: [MetricsSnapshot!]!
+  pageInfo: PageInfo!
+}
+
+type Insight {
+  id: ID!
+  scope: InsightScope!
+  scopeId: ID!
+  generatedAt: DateTime!
+  model: String!
+  summaryText: String!
+  payloadJson: JSON!
+}
+
+type InsightConnection {
+  items: [Insight!]!
+  pageInfo: PageInfo!
+}
+
+input CreateCreatorInput {
+  handle: String!
+  displayName: String!
+  primaryPlatform: Platform!
+  followerCount: Int!
+  engagementRate: Float!
+  ratePerPost: Int!
+}
+
+input CreateCampaignInput {
+  brandId: ID!
+  name: String!
+  budgetCents: Int!
+  startDate: DateTime!
+  endDate: DateTime!
+}
+
+input AssignCreatorInput {
+  campaignId: ID!
+  creatorId: ID!
+  agreedRateCents: Int!
+  role: CampaignRole!
+}
+
+input CreateDeliverableInput {
+  campaignId: ID!
+  creatorId: ID!
+  type: DeliverableType!
+  dueDate: DateTime!
+}
+
+input UpdateDeliverableStatusInput {
+  id: ID!
+  status: DeliverableStatus!
+  postedUrl: String
+}
+
+type Query {
+  health: String!
+  brand(id: ID!): Brand!
+  brands(page: PaginationInput): BrandConnection!
+  creator(id: ID!): Creator!
+  creators(page: PaginationInput, filter: CreatorFilter): CreatorConnection!
+  campaign(id: ID!): Campaign!
+  campaigns(page: PaginationInput, filter: CampaignFilter): CampaignConnection!
+  deliverable(id: ID!): Deliverable!
+  deliverables(page: PaginationInput, filter: DeliverableFilter): DeliverableConnection!
+  insights(page: PaginationInput, scope: InsightScope, scopeId: ID): InsightConnection!
+}
+
+type Mutation {
+  createCreator(input: CreateCreatorInput!): Creator!
+  updateCreatorStatus(id: ID!, status: CreatorStatus!): Creator!
+  createCampaign(input: CreateCampaignInput!): Campaign!
+  updateCampaignStatus(id: ID!, status: CampaignStatus!): Campaign!
+  assignCreatorToCampaign(input: AssignCreatorInput!): CampaignCreator!
+  createDeliverable(input: CreateDeliverableInput!): Deliverable!
+  updateDeliverableStatus(input: UpdateDeliverableStatusInput!): Deliverable!
+}

@@ -1,0 +1,24 @@
+{
+  "name": "nexus",
+  "private": true,
+  "workspaces": [ "apps/*",
+    "packages/*"
+  ],
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/api",
+    "dev:web": "npm run start --workspace=apps/web",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:verify": "npm run db:verify --workspace=apps/api",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:migrate": "npm run db:migrate --workspace=apps/api",
+    "db:seed": "npm run db:seed --workspace=apps/api",
+    "db:reset": "npm run db:reset --workspace=apps/api"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

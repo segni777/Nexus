@@ -1,0 +1,2 @@
+-- CreateEnum
+CREATE TYPE "CampaignRole" AS ENUM ('PRIMARY', 'SUPPORTING', 'AFFILIATE');

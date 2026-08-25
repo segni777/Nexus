@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Platform {
+  TIKTOK
+  INSTAGRAM
+  YOUTUBE
+}
+
+enum CampaignRole {
+  PRIMARY      
+  SUPPORTING   
+  AFFILIATE    
+}
+
+enum CreatorStatus {
+  PROSPECT
+  ACTIVE
+  PAUSED
+  CHURNED
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliverableType {
+  VIDEO
+  POST
+  STORY
+  LIVESTREAM
+}
+
+enum DeliverableStatus {
+  ASSIGNED
+  IN_REVIEW
+  APPROVED
+  POSTED
+  OVERDUE
+}
+
+enum InsightScope {
+  CREATOR
+  CAMPAIGN
+}
+
+model Creator {
+  id              String            @id @default(uuid())
+  handle          String            @unique
+  displayName     String
+  primaryPlatform Platform
+  followerCount   Int
+  engagementRate  Float
+  ratePerPost     Int               // cents
+  status          CreatorStatus     @default(PROSPECT)
+  createdAt       DateTime          @default(now()) @db.Timestamptz()
+  campaigns       CampaignCreator[]
+  deliverables    Deliverable[]
+
+  @@index([status])
+  @@map("creators")
+}
+
+model Brand {
+  id           String     @id @default(uuid())
+  name         String
+  industry     String
+  contactEmail String
+  campaigns    Campaign[]
+
+  @@map("brands")
+}
+
+model Campaign {
+  id          String            @id @default(uuid())
+  brandId     String
+  brand       Brand             @relation(fields: [brandId], references: [id])
+  name        String
+  budgetCents Int
+  startDate   DateTime          @db.Timestamptz()
+  endDate     DateTime          @db.Timestamptz()
+  status      CampaignStatus    @default(DRAFT)
+  creators    CampaignCreator[]
+  deliverables Deliverable[]
+  
+  @@index([brandId])
+  @@index([status])
+  @@map("campaigns")
+}
+
+model CampaignCreator {
+  campaignId      String
+  creatorId       String
+  agreedRateCents Int
+  role            CampaignRole @default(SUPPORTING)   
+
+  campaign        Campaign     @relation(fields: [campaignId], references: [id])
+  creator         Creator      @relation(fields: [creatorId], references: [id])
+
+  @@id([campaignId, creatorId])
+  @@index([creatorId])
+  @@map("campaign_creators")
+}
+
+model Deliverable {
+  id         String            @id @default(uuid())
+  campaignId String
+  creatorId  String
+  campaign   Campaign          @relation(fields: [campaignId], references: [id])
+  creator    Creator           @relation(fields: [creatorId], references: [id])
+  type       DeliverableType
+  dueDate    DateTime          @db.Timestamptz()
+  postedUrl  String?
+  status     DeliverableStatus @default(ASSIGNED)
+  metrics    MetricsSnapshot[]
+
+  @@index([campaignId])
+  @@index([creatorId])
+  @@map("deliverables")
+}
+
+model MetricsSnapshot {
+  id               String      @id @default(uuid())
+  deliverableId    String
+  deliverable      Deliverable @relation(fields: [deliverableId], references: [id])
+  capturedAt       DateTime    @db.Timestamptz()
+  views            Int
+  likes            Int
+  comments         Int
+  shares           Int
+  watchTimeSeconds Int
+
+  @@index([deliverableId, capturedAt])
+  @@map("metrics_snapshots")
+}
+
+model Insight {
+  id          String       @id @default(uuid())
+  scope       InsightScope
+  scopeId     String
+  generatedAt DateTime     @default(now()) @db.Timestamptz()
+  model       String
+  summaryText String
+  payloadJson Json
+
+  @@index([scope, scopeId])
+  @@map("insights")
+}

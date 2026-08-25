@@ -1,0 +1,85 @@
+query CampaignBoard($page: PaginationInput) {
+  campaigns(page: $page) {
+    items {
+      id
+      name
+      status
+      budgetCents
+      spentCents
+      startDate
+      endDate
+      brand {
+        id
+        name
+        industry
+      }
+    }
+    pageInfo {
+      offset
+      limit
+      totalCount
+      hasNextPage
+    }
+  }
+}
+
+query CampaignDetail($id: ID!) {
+  campaign(id: $id) {
+    id
+    name
+    status
+    budgetCents
+    spentCents
+    startDate
+    endDate
+    brand {
+      id
+      name
+    }
+    creators(page: { limit: 50 }) {
+      items {
+        creatorId
+        agreedRateCents
+        role
+        creator {
+          id
+          handle
+          displayName
+          primaryPlatform
+          status
+        }
+      }
+      pageInfo {
+        totalCount
+      }
+    }
+    deliverables(page: { limit: 50 }) {
+      items {
+        id
+        type
+        status
+        dueDate
+        postedUrl
+        creator {
+          id
+          handle
+        }
+        metrics(page: { limit: 50 }) {
+          items {
+            capturedAt
+            views
+            likes
+            comments
+            shares
+          }
+          pageInfo {
+            totalCount
+          }
+        }
+      }
+      pageInfo {
+        totalCount
+      }
+    }
+  }
+}

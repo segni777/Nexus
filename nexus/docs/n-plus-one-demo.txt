@@ -1,0 +1,22 @@
+
+> api@1.0.0 demo:n-plus-one
+> tsx scripts/n-plus-one-demo.ts
+
+1. SELECT "public"."creators"."id", "public"."creators"."handle", "public"."creators"."displayName", "public"."creators"."primaryPlatform"::text, "public"."creators"."followerCount", "public"."creators"."engagementRate", "public"."creators"."ratePerPost", "public"."creators"."status"::text, "public"."creators"."createdAt" FROM "public"."creators" WHERE 1=1 ORDER BY "public"."creators"."id" ASC LIMIT $1 OFFSET $2
+
+NAIVE: one deliverable query per creator
+1. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+2. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+3. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+4. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+5. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+6. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+7. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+8. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+9. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+10. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" = $1 OFFSET $2
+Naive child queries: 10
+
+BATCHED: all creator ids in one query
+1. SELECT "public"."deliverables"."id", "public"."deliverables"."campaignId", "public"."deliverables"."creatorId", "public"."deliverables"."type"::text, "public"."deliverables"."dueDate", "public"."deliverables"."postedUrl", "public"."deliverables"."status"::text FROM "public"."deliverables" WHERE "public"."deliverables"."creatorId" IN ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) OFFSET $11
+Batched child queries: 1
